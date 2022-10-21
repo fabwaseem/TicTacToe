@@ -1,7 +1,7 @@
 const cells = document.querySelectorAll(".cell");
 const playerXScoreSpan = document.querySelector("#playerXScore");
 const playerOScoreSpan = document.querySelector("#playerOScore");
-const resetBtn = document.querySelector("#resetBtn");
+const resetBtn = document.querySelector(".resetBtn");
 const toastDiv = document.querySelector(".toast");
 const draws = document.querySelector("#draws");
 
@@ -12,6 +12,7 @@ let playerOScore = 0;
 let currentLevel = 1;
 let flag = true;
 let currentPlayer = playerX;
+
 const winCombos = [
   [0, 1, 2],
   [3, 4, 5],
@@ -22,24 +23,15 @@ const winCombos = [
   [0, 4, 8],
   [2, 4, 6],
 ];
-const drawStrings = [
-  "no one wins",
-  "draw",
-  "its a draw",
-  "better luck next time",
-  "no one makes it",
-  "its a tie",
-];
 
 for (let i = 0; i < cells.length; i++) {
   cells[i].addEventListener("click", cellClicked);
 }
-
 function cellClicked(e) {
   if (flag) {
     if (e.target.innerHTML === "") {
       e.target.appendChild(addImg(currentPlayer));
-      checkWin();
+      checkWinner();
       checkDraw();
       if (currentPlayer === playerX) {
         currentPlayer = playerO;
@@ -53,11 +45,10 @@ function cellClicked(e) {
 function addImg(type) {
   const img = document.createElement("img");
   img.src = `${type}.png`;
-  img.alt = type;
   return img;
 }
 
-function checkWin() {
+function checkWinner() {
   for (let i = 0; i < winCombos.length; i++) {
     const winCombo = winCombos[i];
     const cell1 = cells[winCombo[0]];
@@ -70,11 +61,11 @@ function checkWin() {
     ) {
       toast(`Player ${currentPlayer} wins!`);
       updateScore();
-      currentLevel++;
       flag = false;
+      currentLevel++;
       setTimeout(() => {
         reset();
-        toast("level " + currentLevel);
+        toast(`level ${currentLevel}`);
       }, 2000);
     }
   }
@@ -82,16 +73,21 @@ function checkWin() {
 
 function checkDraw() {
   if ([...cells].every((cell) => cell.innerHTML !== "")) {
-    const drawString =
-      drawStrings[Math.floor(Math.random() * drawStrings.length)];
-    toast(drawString);
-    draws.textContent++;
+    toast("its a draw");
     currentLevel++;
     setTimeout(() => {
       reset();
-      toast("level " + currentLevel);
+      toast(`level ${currentLevel}`);
     }, 2000);
   }
+}
+
+function toast(msg) {
+  toastDiv.classList.add("show");
+  toastDiv.textContent = msg;
+  setTimeout(() => {
+    toastDiv.classList.remove("show");
+  }, 1000);
 }
 
 function updateScore() {
@@ -112,26 +108,16 @@ function reset() {
 }
 
 resetBtn.addEventListener("click", () => {
-  if ([...cells].some((cell) => cell.innerHTML !== "") || currentLevel > 1) {
-    reset();
-    flag = false;
-    playerXScore = 0;
-    playerOScore = 0;
-    playerXScoreSpan.textContent = playerXScore;
-    playerOScoreSpan.textContent = playerOScore;
-    currentLevel = 1;
-    setTimeout(() => {
-      toast("level " + currentLevel);
-      flag = true;
-    }, 2000);
-    toast("Game Reset!");
-  }
-});
-
-function toast(msg) {
-  toastDiv.classList.add("show");
-  toastDiv.textContent = msg;
+  flag = false;
+  reset();
+  currentLevel = 1;
+  playerOScore = 0;
+  playerXScore = 0;
+  playerOScoreSpan.textContent = playerOScore;
+  playerXScoreSpan.textContent = playerXScore;
+  toast("game reset!");
   setTimeout(() => {
-    toastDiv.classList.remove("show");
-  }, 1000);
-}
+    toast(`level ${currentLevel}`);
+    flag = true;
+  }, 2000);
+});
